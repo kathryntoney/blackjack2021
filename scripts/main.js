@@ -11,7 +11,7 @@ const deck1 = [
     { suit: 'hearts', rank: 'jack', points: 10, img: 'images/jack_of_hearts.png' },
     { suit: 'hearts', rank: 'queen', points: 10, img: 'images/queen_of_hearts.png' },
     { suit: 'hearts', rank: 'king', points: 10, img: 'images/king_of_hearts.png' },
-    { suit: 'hearts', rank: 'ace', points: 1, img: 'images/ace_of_hearts.png' },
+    { suit: 'hearts', rank: 'ace', points: 11, img: 'images/ace_of_hearts.png' },
     { suit: 'spades', rank: '2', points: 2, img: 'images/2_of_spades.png' },
     { suit: 'spades', rank: '3', points: 3, img: 'images/3_of_spades.png' },
     { suit: 'spades', rank: '4', points: 4, img: 'images/4_of_spades.png' },
@@ -24,7 +24,7 @@ const deck1 = [
     { suit: 'spades', rank: 'jack', points: 10, img: 'images/jack_of_spades.png' },
     { suit: 'spades', rank: 'queen', points: 10, img: 'images/queen_of_spades.png' },
     { suit: 'spades', rank: 'king', points: 10, img: 'images/king_of_spades.png' },
-    { suit: 'spades', rank: 'ace', points: 1, img: 'images/ace_of_spades.png' },
+    { suit: 'spades', rank: 'ace', points: 11, img: 'images/ace_of_spades.png' },
     { suit: 'diamonds', rank: '2', points: 2, img: 'images/2_of_diamonds.png' },
     { suit: 'diamonds', rank: '3', points: 3, img: 'images/3_of_diamonds.png' },
     { suit: 'diamonds', rank: '4', points: 4, img: 'images/4_of_diamonds.png' },
@@ -37,7 +37,7 @@ const deck1 = [
     { suit: 'diamonds', rank: 'jack', points: 10, img: 'images/jack_of_diamonds.png' },
     { suit: 'diamonds', rank: 'queen', points: 10, img: 'images/queen_of_diamonds.png' },
     { suit: 'diamonds', rank: 'king', points: 10, img: 'images/king_of_diamonds.png' },
-    { suit: 'diamonds', rank: 'ace', points: 1, img: 'images/ace_of_diamonds.png' },
+    { suit: 'diamonds', rank: 'ace', points: 11, img: 'images/ace_of_diamonds.png' },
     { suit: 'clubs', rank: '2', points: 2, img: 'images/2_of_clubs.png' },
     { suit: 'clubs', rank: '3', points: 3, img: 'images/3_of_clubs.png' },
     { suit: 'clubs', rank: '4', points: 4, img: 'images/4_of_clubs.png' },
@@ -50,7 +50,7 @@ const deck1 = [
     { suit: 'clubs', rank: 'jack', points: 10, img: 'images/jack_of_clubs.png' },
     { suit: 'clubs', rank: 'queen', points: 10, img: 'images/queen_of_clubs.png' },
     { suit: 'clubs', rank: 'king', points: 10, img: 'images/king_of_clubs.png' },
-    { suit: 'clubs', rank: 'ace', points: 1, img: 'images/ace_of_clubs.png' }
+    { suit: 'clubs', rank: 'ace', points: 11, img: 'images/ace_of_clubs.png' }
 ]
 
 const body = document.querySelector('body')
@@ -91,6 +91,7 @@ class Player {
         playerDisplay.setAttribute('class', 'result-win')
         dealerDisplay.setAttribute('class', 'result-lose')
         dealButton.disabled = false;
+        playerWinCount += 1;
     }
 }
 
@@ -115,6 +116,7 @@ class Dealer extends Player {
     dealerWins(player) {
         dealerDisplay.setAttribute('class', 'result-win')
         playerDisplay.setAttribute('class', 'result-lose')
+        dealerWinCount += 1;
         dealButton.disabled = false;
     }
 }
@@ -131,14 +133,28 @@ function shuffle(deck) {
 }
 
 function dealerAceCheck() {
-    if (dealer.hand.rank === 'ace' && dealer.dealerScore < 12) {
-        dealer.dealerScore += 10;
+    if (dealer.hand.rank == 'ace') {
+        if (dealer.dealerScore + 11 > 21) {
+            dealer.dealerScore = dealer.dealerScore - 10;
+        }
+        dealerHasAce = true;
+        // else {
+        //     dealer.dealerScore = dealer.dealerScore + 11;
+        //     dealerHasAce = true;
+        // }
     }
 }
 
 function playerAceCheck() {
-    if (dealer.hand.rank === 'ace' && player.currentScore < 12) {
-        player.currentScore += 10;
+    if (player.hand.rank == 'ace') {
+        if (player.currentScore + 11 > 21) {
+            player.currentScore = player.currentScore - 10;
+        }
+        playerHasAce = true;
+        // else {
+        //     player.currentScore = player.currentScore + 11;
+        //     playerHasAce = true;
+        // }
     }
 }
 
@@ -147,26 +163,134 @@ function dealCard(deck) {
     return deck.pop();
 }
 
-function clearBoard {
-    messageDisplay.textContent = "";
-    playerDisplay.removeAttribute('class', 'result-lose')
-    playerDisplay.removeAttribute('class', 'result-win')
-    dealerDisplay.removeAttribute('class', 'result-lose')
-    dealerDisplay.removeAttribute('class', 'result-win')
-    playerDisplay.textContent = 'Player:';
-    dealerDisplay.textContent = 'Dealer:';
-    dealer.currentScore = 0;
-    dealer.dealerScore = 0;
-    dealer.hand = [];
-    player.currentScore = 0;
-    dealer.hand = [];
-    playerCardsInPlay.innerHTML = "";
-    dealerCardsInPlay.innerHTML = "";
-    dealerFlop.innerHTML = "";
+function checkForBJ() {
+    if (player.currentScore === 21 && dealer.dealerScore !== 21) {
+        dealerDisplay.textContent = `Dealer: ${dealer.dealerScore}`
+        messageDisplay.textContent = 'PLAYER BLACKJACK!!! Click deal to play again'
+        hitButton.disabled = true;
+        standButton.disabled = true;
+        player.playerWins();
+        winCount.textContent = `Player Wins: ${playerWinCount} / Dealer Wins: ${dealerWinCount}`;
+    }
+    if (dealer.dealerScore === 21 && player.currentScore !== 21) {
+        dealerDisplay.textContent = `Dealer: ${dealer.dealerScore}`
+        messageDisplay.textContent = 'Dealer Blackjack - click deal to play again'
+        hitButton.disabled = true;
+        standButton.disabled = true;
+        dealer.dealerWins();
+        flipHiddenCard();
+        winCount.textContent = `Player Wins: ${playerWinCount} / Dealer Wins: ${dealerWinCount}`;
+    }
+    if (dealer.dealerScore === 21 && player.currentScore === 21) {
+        dealerDisplay.textContent = `Dealer: ${dealer.dealerScore}`
+        messageDisplay.textContent = 'PUSH - click deal to play again'
+        hitButton.disabled = true;
+        standButton.disabled = true;
+        flipHiddenCard();
+    }
 }
 
-var gameDeck = shuffle(deck1)
-dealButton.addEventListener('click', (e) => {
+function checkScores() {
+    dealerAceCheck();
+    playerAceCheck();
+    if (dealer.dealerScore > 21 && player.currentScore < 21) {
+        dealerDisplay.textContent = `Dealer: ${dealer.dealerScore}`;
+        messageDisplay.textContent = 'House Busts, Player Wins - click deal to play again';
+        hitButton.disabled = true;
+        standButton.disabled = true;
+        player.playerWins();
+        flipHiddenCard();
+        winCount.textContent = `Player Wins: ${playerWinCount} / Dealer Wins: ${dealerWinCount}`
+        dealButton.disabled = false;
+    }
+    if (player.currentScore > 21 && dealer.dealerScore < 21) {
+        dealerDisplay.textContent = `Dealer: ${dealer.dealerScore}`;
+        messageDisplay.textContent = 'Player Busts - click deal to play again';
+        hitButton.disabled = true;
+        standButton.disabled = true;
+        dealer.dealerWins();
+        flipHiddenCard();
+        winCount.textContent = `Player Wins: ${playerWinCount} / Dealer Wins: ${dealerWinCount}`
+        dealButton.disabled = false;
+    }
+    if (player.currentScore === dealer.dealerScore && dealer.dealerScore > 16) {
+        dealerDisplay.textContent = `Dealer: ${dealer.dealerScore}`;
+        messageDisplay.textContent = 'PUSH - click deal to play again'
+        hitButton.disabled = true;
+        standButton.disabled = true;
+        flipHiddenCard();
+        dealButton.disabled = false;
+    }
+    if (player.currentScore === 21 && dealer.dealerScore !== 21) {
+        dealerDisplay.textContent = `Dealer: ${dealer.dealerScore}`;
+        messageDisplay.textContent = 'Player Wins! Click deal to play again'
+        player.playerWins();
+        hitButton.disabled = true;
+        standButton.disabled = true;
+        flipHiddenCard();
+        winCount.textContent = `Player Wins: ${playerWinCount} / Dealer Wins: ${dealerWinCount}`
+        dealButton.disabled = false;
+    }
+    if (dealer.dealerScore === 21 && player.currentScore !== 21) {
+        dealerDisplay.textContent = `Dealer: ${dealer.dealerScore}`;
+        messageDisplay.textContent = 'House Wins - click deal to play again'
+        dealer.dealerWins();
+        hitButton.disabled = true;
+        standButton.disabled = true;
+        flipHiddenCard();
+        winCount.textContent = `Player Wins: ${playerWinCount} / Dealer Wins: ${dealerWinCount}`
+        dealButton.disabled = false;
+    }
+    if (dealer.dealerScore < 17) {
+        currentCard = dealCard(deck1);
+        dealer.dealDealerCard();
+        dealerAceCheck();
+    }
+    if (dealer.dealerScore > 17 && dealer.dealerScore < 21 && dealer.dealerScore > player.currentScore) {
+        dealerDisplay.textContent = `Dealer: ${dealer.dealerScore}`;
+        messageDisplay.textContent = 'House Wins - click deal to play again'
+        dealer.dealerWins();
+        hitButton.disabled = true;
+        standButton.disabled = true;
+        flipHiddenCard();
+        winCount.textContent = `Player Wins: ${playerWinCount} / Dealer Wins: ${dealerWinCount}`
+        dealButton.disabled = false;
+    }
+    if (dealer.dealerScore > 21 && player.currentScore > 21) {
+        dealerDisplay.textContent = `Dealer: ${dealer.dealerScore}`;
+        messageDisplay.textContent = 'BUST!!! click deal to play again'
+        hitButton.disabled = true;
+        standButton.disabled = true;
+        flipHiddenCard();
+        dealButton.disabled = false;
+    }
+}
+
+function dealerStand() {
+    if (dealer.dealerScore < 17 && player.currentScore <= 21) {
+        playerAceCheck();
+        dealerAceCheck();
+        do {
+            currentCard = dealCard(deck1);
+            dealer.dealDealerCard();
+            dealerAceCheck();
+            dealerDisplay.textContent = `Dealer: ${dealer.currentScore}`
+        } while (dealer.dealerScore < 17)
+    }
+}
+
+function flipHiddenCard() {
+    let dealerCard = document.createElement('img')
+    dealerCard.setAttribute('class', 'card')
+    dealerCard.setAttribute('id', 'dealerCard')
+    currentCard = dealer.hand[1]
+    dealerCard.setAttribute('src', currentCard.img)
+    dealerFlop.append(dealerCard)
+}
+
+function initializeGame() {
+    playerHasAce = false;
+    dealerHasAce = false;
     messageDisplay.textContent = "";
     playerDisplay.textContent = 'Player:';
     dealerDisplay.textContent = 'Dealer:';
@@ -195,265 +319,39 @@ dealButton.addEventListener('click', (e) => {
     dealButton.disabled = true;
     hitButton.disabled = false;
     standButton.disabled = false;
-    if (player.currentScore === 21 && dealer.dealerScore !== 21) {
-        dealerDisplay.textContent = `Dealer: ${dealer.dealerScore}`
-        messageDisplay.textContent = 'BLACKJACK!!! Click deal to play again'
-        hitButton.disabled = true;
-        standButton.disabled = true;
-        player.playerWins();
-        playerWinCount += 1;
-        winCount.textContent = `Player Wins: ${playerWinCount} / Dealer Wins: ${dealerWinCount}`;
-    }
-    else if (dealer.dealerScore === 21 && player.currentScore !== 21) {
-        dealerDisplay.textContent = `Dealer: ${dealer.dealerScore}`
-        dealerCard = document.createElement('img')
-        dealerCard.setAttribute('class', 'card')
-        dealerCard.setAttribute('id', 'dealerCard')
-        dealerCard.setAttribute('src', currentCard.img)
-        dealerCardsInPlay.append(dealerCard)
-        messageDisplay.textContent = 'House wins - click deal to play again'
-        hitButton.disabled = true;
-        standButton.disabled = true;
-        dealer.dealerWins();
-        dealerWinCount += 1;
-        winCount.textContent = `Player Wins: ${playerWinCount} / Dealer Wins: ${dealerWinCount}`;
-    }
-    else if (dealer.dealerScore === 21 && player.currentScore === 21) {
-        dealerCard = document.createElement('img')
-        dealerCard.setAttribute('class', 'card')
-        dealerCard.setAttribute('id', 'dealerCard')
-        dealerCard.setAttribute('src', currentCard.img)
-        dealerCardsInPlay.append(dealerCard)
-        messageDisplay.textContent = 'PUSH - click deal to play again'
-        hitButton.disabled = true;
-        standButton.disabled = true;
-        playerDisplay.setAttribute('class', 'result-lose')
-        dealerDisplay.setAttribute('class', 'result-lose')
-    }
-    else if (player.currentScore > 21) {
-        messageDisplay.textContent = 'Player Busts - click deal to play again'
-        hitButton.disabled = true;
-        standButton.disabled = true;
-        dealerDisplay.textContent = `Dealer: ${dealer.dealerScore}`
-        let dealerCard = document.createElement('img')
-        dealerCard.setAttribute('class', 'card')
-        dealerCard.setAttribute('id', 'dealerCard')
-        currentCard = dealer.hand[1]
-        dealerCard.setAttribute('src', currentCard.img)
-        dealerCardsInPlay.append(dealerCard)
-        dealer.dealerWins();
-        dealerWinCount += 1;
-        winCount.textContent = `Player Wins: ${playerWinCount} / Dealer Wins: ${dealerWinCount}`
-    }
-    else if (dealer.dealerScore > 21) {
-        messageDisplay.textContent = 'House Busts, Player Wins - click deal to play again'
-        hitButton.disabled = true;
-        standButton.disabled = true;
-        dealerDisplay.textContent = `Dealer: ${dealer.dealerScore}`
-        let dealerCard = document.createElement('img')
-        dealerCard.setAttribute('class', 'card')
-        dealerCard.setAttribute('id', 'dealerCard')
-        currentCard = dealer.hand[1]
-        dealerCard.setAttribute('src', currentCard.img)
-        dealerCardsInPlay.append(dealerCard)
-        player.playerWins();
-        playerWinCount += 1;
-        winCount.textContent = `Player Wins: ${playerWinCount} / Dealer Wins: ${dealerWinCount}`
-    }
+}
+
+
+
+
+// ======= GAME STARTS HERE =======
+var gameDeck = shuffle(deck1)
+dealButton.addEventListener('click', (e) => {
+    initializeGame();
+    checkForBJ();
 })
 
 hitButton.addEventListener('click', (e) => {
-    playerAceCheck();
-    playerDisplay.textContent = `Player: ${player.currentScore}`
-    dealerAceCheck();
     currentCard = dealCard(deck1);
     player.dealPlayerCard();
     playerAceCheck();
-    playerDisplay.textContent = `Player: ${player.currentScore}`
-    if (player.currentScore > 21) {
-        messageDisplay.textContent = 'Player Busts - click deal to play again'
-        hitButton.disabled = true;
-        standButton.disabled = true;
-        playerDisplay.setAttribute('class', 'result-win')
-        dealerDisplay.setAttribute('class', 'result-lose')
-        dealerDisplay.textContent = `Dealer: ${dealer.dealerScore}`
-        let dealerCard = document.createElement('img')
-        dealerCard.setAttribute('class', 'card')
-        dealerCard.setAttribute('id', 'dealerCard')
-        currentCard = dealer.hand[1]
-        dealerCard.setAttribute('src', currentCard.img)
-        dealerFlop.append(dealerCard)
-        dealer.dealerWins();
-        dealerWinCount += 1;
-        winCount.textContent = `Player Wins: ${playerWinCount} / Dealer Wins: ${dealerWinCount}`
-    }
-    else if (dealer.dealerScore > 21) {
-        messageDisplay.textContent = 'House Busts, Player Wins - click deal to play again'
-        hitButton.disabled = true;
-        standButton.disabled = true;
-        dealerDisplay.textContent = `Dealer: ${dealer.dealerScore}`
-        let dealerCard = document.createElement('img')
-        dealerCard.setAttribute('class', 'card')
-        dealerCard.setAttribute('id', 'dealerCard')
-        currentCard = dealer.hand[1]
-        dealerCard.setAttribute('src', currentCard.img)
-        dealerFlop.append(dealerCard)
-        player.playerWins();
-        playerWinCount += 1;
-        winCount.textContent = `Player Wins: ${playerWinCount} / Dealer Wins: ${dealerWinCount}`
-    }
-    else if (dealer.dealerScore < 17) {
-        currentCard = dealCard(deck1);
-        dealer.dealDealerCard();
-        dealerAceCheck();
-        console.log(dealer.dealerScore);
-    }
-    else if (player.currentScore === 21 && dealer.dealerScore !== 21) {
-        messageDisplay.textContent = 'Player Wins - click deal to play again'
-        hitButton.disabled = true;
-        standButton.disabled = true;
-        dealerDisplay.textContent = `Dealer: ${dealer.dealerScore}`
-        let dealerCard = document.createElement('img')
-        dealerCard.setAttribute('class', 'card')
-        dealerCard.setAttribute('id', 'dealerCard')
-        currentCard = dealer.hand[1]
-        dealerCard.setAttribute('src', currentCard.img)
-        dealerFlop.append(dealerCard)
-        player.playerWins();
-        playerWinCount += 1;
-        winCount.textContent = `Player Wins: ${playerWinCount} / Dealer Wins: ${dealerWinCount}`
-    }
-    else if (dealer.dealerScore === 21 && player.currentScore !== 21) {
-        messageDisplay.textContent = 'House Wins - click deal to play again'
-        hitButton.disabled = true;
-        standButton.disabled = true;
-        dealerDisplay.textContent = `Dealer: ${dealer.dealerScore}`
-        let dealerCard = document.createElement('img')
-        dealerCard.setAttribute('class', 'card')
-        dealerCard.setAttribute('id', 'dealerCard')
-        currentCard = dealer.hand[1]
-        dealerCard.setAttribute('src', currentCard.img)
-        dealerFlop.append(dealerCard)
-        dealer.dealerWins();
-        dealerWinCount += 1;
-        winCount.textContent = `Player Wins: ${playerWinCount} / Dealer Wins: ${dealerWinCount}`
-    }
-    else if (dealer.dealerScore == player.currentScore) {
-        messageDisplay.textContent = 'PUSH - click deal to play again'
-        hitButton.disabled = true;
-        standButton.disabled = true;
-        dealerDisplay.textContent = `Dealer: ${dealer.dealerScore}`
-        let dealerCard = document.createElement('img')
-        dealerCard.setAttribute('class', 'card')
-        dealerCard.setAttribute('id', 'dealerCard')
-        currentCard = dealer.hand[1]
-        dealerCard.setAttribute('src', currentCard.img)
-        dealerFlop.append(dealerCard)
-        playerDisplay.setAttribute('class', 'result-lose')
-        dealerDisplay.setAttribute('class', 'result-lose')
-        dealButton.disabled = false;
-    }
-    else {
-        messageDisplay.textContent = 'Click hit or stand'
-    }
+    dealerAceCheck();
+    checkScores();
+    playerDisplay.textContent = `Player: ${player.currentScore}`;
+    dealerDisplay.textContent = `Dealer: ${dealer.dealerScore}`;
 })
 
 standButton.addEventListener('click', (e) => {
-    playerAceCheck();
-    console.log(player.currentScore)
+    dealerStand();
     dealerAceCheck();
-    console.log(dealer.dealerScore);
-    if (dealer.dealerScore < 17 && player.currentScore <= 21) {
-        do {
-            currentCard = dealCard(deck1);
-            dealer.dealDealerCard();
-            dealerAceCheck();
-            dealerDisplay.textContent = `Dealer: ${dealer.currentScore}`
-        } while (dealer.dealerScore < 17)
-    }
-    else if (dealer.dealerScore > 21 && player.currentScore < 21) {
-        messageDisplay.textContent = 'House Busts, Player Wins - click deal to play again'
-        hitButton.disabled = true;
-        standButton.disabled = true;
-        dealerDisplay.textContent = `Dealer: ${dealer.dealerScore}`
-        let dealerCard = document.createElement('img')
-        dealerCard.setAttribute('class', 'card')
-        dealerCard.setAttribute('id', 'dealerCard')
-        currentCard = dealer.hand[1]
-        dealerCard.setAttribute('src', currentCard.img)
-        dealerFlop.append(dealerCard)
-        player.playerWins();
-        playerWinCount += 1;
-        winCount.textContent = `Player Wins: ${playerWinCount} / Dealer Wins: ${dealerWinCount}`
-        dealButton.disabled = false;
-    }
-    if (dealer.dealerScore > player.currentScore && dealer.dealerScore <= 21) {
-        messageDisplay.textContent = 'House Wins, Player Loses - click deal to play again'
-        hitButton.disabled = true;
-        standButton.disabled = true;
-        dealerDisplay.textContent = `Dealer: ${dealer.dealerScore}`
-        let dealerCard = document.createElement('img')
-        dealerCard.setAttribute('class', 'card')
-        dealerCard.setAttribute('id', 'dealerCard')
-        currentCard = dealer.hand[1]
-        dealerCard.setAttribute('src', currentCard.img)
-        dealerFlop.append(dealerCard)
-        dealer.dealerWins();
-        dealerWinCount += 1;
-        winCount.textContent = `Player Wins: ${playerWinCount} / Dealer Wins: ${dealerWinCount}`
-        dealButton.disabled = false;
-    }
-    else if (dealer.dealerScore === 21 && player.currentScore !== 21) {
-        messageDisplay.textContent = 'House Wins - click deal to play again'
-        hitButton.disabled = true;
-        standButton.disabled = true;
-        dealerDisplay.textContent = `Dealer: ${dealer.dealerScore}`
-        let dealerCard = document.createElement('img')
-        dealerCard.setAttribute('class', 'card')
-        dealerCard.setAttribute('id', 'dealerCard')
-        currentCard = dealer.hand[1]
-        dealerCard.setAttribute('src', currentCard.img)
-        dealerFlop.append(dealerCard)
-        dealer.dealerWins();
-        dealerWinCount += 1;
-        winCount.textContent = `Player Wins: ${playerWinCount} / Dealer Wins: ${dealerWinCount}`
-        dealButton.disabled = false;
-    }
-    else if (dealer.dealerScore < player.currentScore && player.currentScore < 21) {
-        messageDisplay.textContent = 'Player Wins, House Loses - click deal to play again'
-        hitButton.disabled = true;
-        standButton.disabled = true;
-        dealerDisplay.textContent = `Dealer: ${dealer.dealerScore}`
-        let dealerCard = document.createElement('img')
-        dealerCard.setAttribute('class', 'card')
-        dealerCard.setAttribute('id', 'dealerCard')
-        currentCard = dealer.hand[1]
-        dealerCard.setAttribute('src', currentCard.img)
-        dealerFlop.append(dealerCard)
-        player.playerWins();
-        playerWinCount += 1;
-        winCount.textContent = `Player Wins: ${playerWinCount} / Dealer Wins: ${dealerWinCount}`
-        dealButton.disabled = false;
-    }
-    else if (dealer.dealerScore == player.currentScore) {
-        playerDisplay.setAttribute('class', 'result-lose')
-        dealerDisplay.setAttribute('class', 'result-lose')
-        messageDisplay.textContent = 'PUSH - click deal to play again'
-        hitButton.disabled = true;
-        standButton.disabled = true;
-        dealerDisplay.textContent = `Dealer: ${dealer.dealerScore}`
-        let dealerCard = document.createElement('img')
-        dealerCard.setAttribute('class', 'card')
-        dealerCard.setAttribute('id', 'dealerCard')
-        currentCard = dealer.hand[1]
-        dealerCard.setAttribute('src', currentCard.img)
-        dealerFlop.append(dealerCard)
-        dealButton.disabled = false;
-    }
-
+    checkScores();
+    playerDisplay.textContent = `Player: ${player.currentScore}`;
+    dealerDisplay.textContent = `Dealer: ${dealer.dealerScore}`;
 })
 
 resetButton.addEventListener('click', (e) => {
+    playerAceCheck();
+    dealerAceCheck();
     messageDisplay.textContent = "";
     playerDisplay.removeAttribute('class', 'result-lose')
     playerDisplay.removeAttribute('class', 'result-win')
@@ -471,3 +369,4 @@ resetButton.addEventListener('click', (e) => {
     dealerFlop.innerHTML = "";
     dealButton.disabled = false;
 })
+

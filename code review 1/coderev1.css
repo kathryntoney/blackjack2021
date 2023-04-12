@@ -1,0 +1,53 @@
+body {
+    font-family: "Gideon Roman", cursive;
+    font-family: "Montserrat", sans-serif;
+    font-family: "Roboto", sans-serif;
+  }
+  
+  .playerCards,
+  .dealerCards {
+    display: grid;
+    place-items: center;
+    border: solid 3px black;
+    width: 70px;
+    height: 80px;
+  }
+  
+  .player,
+  .dealer {
+    display: flex;
+    width: 100%;
+    flex-wrap: wrap;
+    justify-content: space-around;
+    margin-bottom: 30px;
+  }
+  
+  .hitButton {
+    color: white;
+    background-color: #d21404;
+    margin: 20px;
+    border: none;
+    height: 40px;
+    width: 80px;
+    cursor: pointer;
+  }
+  
+  .standButton {
+    color: white;
+    background-color: black;
+    margin: 20px;
+    border: none;
+    height: 40px;
+    width: 80px;
+    cursor: pointer;
+  }
+  
+  .dealButton {
+    color: white;
+    background-color: #808080;
+    margin: 20px;
+    border: none;
+    height: 40px;
+    width: 80px;
+    cursor: pointer;
+  }
